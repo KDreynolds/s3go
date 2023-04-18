@@ -17,6 +17,7 @@ To install `s3go`, run the following command:
 
 ```bash
 go get -u github.com/KDreynolds/s3go
+```bash
 
 Usage
 
