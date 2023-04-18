@@ -17,13 +17,13 @@ To install `s3go`, run the following command:
 
 ```bash
 go get -u github.com/KDreynolds/s3go
-```bash
+```
 
-Usage
+## Usage
 
-Here's a simple example demonstrating how to use the s3go library:
+Here's a simple example demonstrating how to use the `s3go` library:
 
-
+```go
 package main
 
 import (
@@ -31,7 +31,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/your_username/s3go"
+	"github.com/KDreynolds/s3go"
 )
 
 func main() {
@@ -50,14 +50,17 @@ func main() {
 	// Other operations (create/delete buckets, list/upload/download/delete/copy objects, etc.)
 	// ...
 }
+```
 
-Documentation
+## Documentation
 
-For detailed documentation of the functions provided by s3go, please refer to the source code comments and the AWS SDK for Go documentation.
-Contributing
+For detailed documentation of the functions provided by `s3go`, please refer to the source code comments and the [AWS SDK for Go documentation](https://pkg.go.dev/github.com/aws/aws-sdk-go/service/s3).
+
+## Contributing
 
 Contributions are welcome! If you'd like to contribute, please fork the repository and create a pull request with your changes.
-License
 
-This project is licensed under the MIT License. See the LICENSE file for more information.
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
 
