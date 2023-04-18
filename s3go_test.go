@@ -64,3 +64,117 @@ func TestCreateAndDeleteBucket(t *testing.T) {
 	}
 }
 
+func TestObjectOperations(t *testing.T) {
+	client := getS3goClient(t)
+	bucketName := "go-s3go-test-object-operations"
+	testFileName := "testfile.txt"
+	testFileKey := "testfile_key.txt"
+	downloadedFileName := "downloaded_testfile.txt"
+
+	// Create a test bucket
+	_, err := client.CreateBucket(bucketName)
+	if err != nil {
+		t.Fatalf("CreateBucket() failed: %s", err)
+	}
+	defer client.DeleteBucket(bucketName) // Clean up the test bucket
+
+	// Create a test file
+	err = os.WriteFile(testFileName, []byte("This is a test file"), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test file: %s", err)
+	}
+	defer os.Remove(testFileName) // Clean up the test file
+
+	// Test UploadFile
+	_, err = client.UploadFile(bucketName, testFileName, testFileKey)
+	if err != nil {
+		t.Errorf("UploadFile() failed: %s", err)
+	}
+
+	// Test ListObjects
+	objects, err := client.ListObjects(bucketName)
+	if err != nil {
+		t.Errorf("ListObjects() failed: %s", err)
+	}
+
+	found := false
+	for _, object := range objects {
+		if *object.Key == testFileKey {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Errorf("UploadFile() failed: object not found in the list of objects")
+	}
+
+	// Test DownloadFile
+	_, err = client.DownloadFile(bucketName, testFileKey, downloadedFileName)
+	if err != nil {
+		t.Errorf("DownloadFile() failed: %s", err)
+	}
+	defer os.Remove(downloadedFileName) // Clean up the downloaded test file
+
+	// Test DeleteObject
+	_, err = client.DeleteObject(bucketName, testFileKey)
+	if err != nil {
+		t.Errorf("DeleteObject() failed: %s", err)
+	}
+}
+
+func TestCopyObject(t *testing.T) {
+	client := getS3goClient(t)
+	bucketName := "go-s3go-test-copy-object"
+	sourceKey := "source_key.txt"
+	destinationKey := "destination_key.txt"
+
+	// Create a test bucket
+	_, err := client.CreateBucket(bucketName)
+	if err != nil {
+		t.Fatalf("CreateBucket() failed: %s", err)
+	}
+	defer client.DeleteBucket(bucketName) // Clean up the test bucket
+
+	// Create a test file
+	sourceFileName := "sourcefile.txt"
+	err = os.WriteFile(sourceFileName, []byte("This is the source file"), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create source file: %s", err)
+	}
+	defer os.Remove(sourceFileName) // Clean up the source test file
+
+	// Upload the source file
+	_, err = client.UploadFile(bucketName, sourceFileName, sourceKey)
+	if err != nil {
+		t.Fatalf("UploadFile() failed: %s", err)
+	}
+
+	// Test CopyObject
+	_, err = client.CopyObject(bucketName, sourceKey, bucketName, destinationKey)
+	if err != nil {
+		t.Errorf("CopyObject() failed: %s", err)
+	}
+
+	// Check if the destination object exists
+	objects, err := client.ListObjects(bucketName)
+	if err != nil {
+		t.Errorf("ListObjects() failed: %s", err)
+	}
+	
+	found := false
+	for _, object := range objects {
+		if *object.Key == destinationKey {
+			found = true
+			break
+		}
+	}
+	
+	if !found {
+		t.Errorf("CopyObject() failed: destination object not found in the list of objects")
+	}
+	
+	// Clean up the test objects
+	_, _ = client.DeleteObject(bucketName, sourceKey)
+	_, _ = client.DeleteObject(bucketName, destinationKey)
+	
